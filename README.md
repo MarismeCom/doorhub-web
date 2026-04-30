@@ -2,6 +2,12 @@
 
 DoorHub Web 是门禁与考勤管理系统的前端应用，基于 Vue 3、PrimeVue 和 Vite 构建。当前前端围绕门禁设备、门禁用户、打卡流水、月度考勤、节假日缓存和系统用户管理提供完整操作界面。
 
+## 支持设备
+
+| 品牌 / 协议 | 型号 | 支持状态 | 说明 |
+| --- | --- | --- | --- |
+| ZK / ZKTeco | xFace600 | 已测试支持 | 当前已完成门禁用户、打卡流水、设备状态与远程开门等核心流程测试 |
+
 ## 技术栈
 
 - Vue 3
@@ -60,7 +66,7 @@ npm run build
 - 业务路由统一要求登录访问，未登录用户会跳转到 `/auth/login`。
 - 接口返回 401 时会清理本地会话。
 
-![登录页截图](docs/images/login.png)
+截图待上传：[docs/images/login.png](docs/images/login.png)
 
 ## 功能模块
 
@@ -79,7 +85,7 @@ npm run build
 - 门禁用户结构、设备状态分布、用户同步状态、打卡趋势图表。
 - 手动刷新工作台数据。
 
-![工作台截图](docs/images/dashboard.png)
+截图待上传：[docs/images/dashboard.png](docs/images/dashboard.png)
 
 ### 打卡流水
 
@@ -101,7 +107,7 @@ npm run build
 - 支持设置每日同步时间。
 - 支持选择定时同步设备范围，未选择时默认同步全部启用设备。
 
-![打卡流水截图](docs/images/attendances.png)
+截图待上传：[docs/images/attendances.png](docs/images/attendances.png)
 
 ### 考勤记录
 
@@ -119,7 +125,7 @@ npm run build
 - 支持重算当月考勤记录。
 - 支持导出月报文件。
 
-![考勤记录截图](docs/images/attendance-records.png)
+截图待上传：[docs/images/attendance-records.png](docs/images/attendance-records.png)
 
 ### 门禁用户
 
@@ -142,7 +148,7 @@ npm run build
 - 查询用户同步状态。
 - 展示待同步、待离职同步、已同步、已离职同步、同步失败等状态。
 
-![门禁用户截图](docs/images/users.png)
+截图待上传：[docs/images/users.png](docs/images/users.png)
 
 ### 门禁控制
 
@@ -163,7 +169,7 @@ npm run build
 - 展示操作人、设备 IP、动作、结果、备注、操作时间。
 - 展示最近一次控制接口响应。
 
-![门禁控制截图](docs/images/door.png)
+截图待上传：[docs/images/door.png](docs/images/door.png)
 
 ### 节假日
 
@@ -184,7 +190,7 @@ npm run build
 - 支持设置每周执行日。
 - 支持手动刷新指定年份节假日缓存。
 
-![节假日截图](docs/images/holiday-cache.png)
+截图待上传：[docs/images/holiday-cache.png](docs/images/holiday-cache.png)
 
 ### 设备管理
 
@@ -202,7 +208,7 @@ npm run build
 - 展示设备名称、IP、端口、序列号、位置、状态。
 - 展示最近探测结果和错误信息。
 
-![设备管理截图](docs/images/devices.png)
+截图待上传：[docs/images/devices.png](docs/images/devices.png)
 
 ### 系统用户
 
@@ -225,7 +231,7 @@ npm run build
 - 撤销 API Secret。
 - 创建成功后仅展示一次明文 Secret。
 
-![系统用户截图](docs/images/system-users.png)
+截图待上传：[docs/images/system-users.png](docs/images/system-users.png)
 
 ## 菜单结构
 
@@ -341,6 +347,18 @@ README 已预留以下截图位置。截图完成后，将图片放到 `docs/ima
 - `docs/images/holiday-cache.png`
 - `docs/images/devices.png`
 - `docs/images/system-users.png`
+
+上传图片后，如果希望 README 直接渲染图片，可将对应占位链接改为相对路径图片语法，例如：
+
+```md
+![登录页截图](docs/images/login.png)
+```
+
+如果需要使用完整 GitHub 地址渲染图片，请使用 `raw.githubusercontent.com`，不要使用 `github.com/.../blob/...`：
+
+```md
+![登录页截图](https://raw.githubusercontent.com/MarismeCom/doorhub-web/main/docs/images/login.png)
+```
 
 ## 后端联调要求
 
