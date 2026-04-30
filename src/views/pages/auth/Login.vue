@@ -4,20 +4,54 @@ import { login } from '@/service/auth';
 import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
+const REMEMBERED_LOGIN_KEY = 'door_access_remembered_login';
+
 const router = useRouter();
 const route = useRoute();
 
-const username = ref('admin');
-const password = ref('admin');
-const checked = ref(true);
+const rememberedLogin = readRememberedLogin();
+const username = ref(rememberedLogin?.username || '');
+const password = ref(rememberedLogin?.password || '');
+const checked = ref(Boolean(rememberedLogin));
 const loading = ref(false);
 const errorMessage = ref('');
+
+function readRememberedLogin() {
+    const raw = localStorage.getItem(REMEMBERED_LOGIN_KEY);
+    if (!raw) {
+        return null;
+    }
+
+    try {
+        const parsed = JSON.parse(raw);
+        return parsed?.username && parsed?.password ? parsed : null;
+    } catch {
+        localStorage.removeItem(REMEMBERED_LOGIN_KEY);
+        return null;
+    }
+}
+
+function syncRememberedLogin() {
+    if (checked.value) {
+        localStorage.setItem(
+            REMEMBERED_LOGIN_KEY,
+            JSON.stringify({
+                username: username.value,
+                password: password.value
+            })
+        );
+        return;
+    }
+
+    localStorage.removeItem(REMEMBERED_LOGIN_KEY);
+}
 
 async function submitLogin() {
     loading.value = true;
     errorMessage.value = '';
     try {
         await login(username.value, password.value);
+        syncRememberedLogin();
         await router.push(route.query.redirect || '/');
     } catch (error) {
         errorMessage.value = error.message || '登录失败';
@@ -44,12 +78,12 @@ async function submitLogin() {
                     <div class="flex flex-col gap-4">
                         <div class="flex flex-col gap-2">
                             <label for="username" class="text-surface-900 dark:text-surface-0 text-xl font-medium">用户名</label>
-                            <InputText id="username" type="text" placeholder="admin" class="w-full" v-model="username" @keyup.enter="submitLogin" />
+                            <InputText id="username" type="text" placeholder="请输入用户名" class="w-full" v-model="username" autocomplete="username" @keyup.enter="submitLogin" />
                         </div>
 
                         <div class="flex flex-col gap-2">
                             <label for="password" class="text-surface-900 dark:text-surface-0 font-medium text-xl">密码</label>
-                            <Password id="password" v-model="password" placeholder="Password" :toggleMask="true" fluid :feedback="false" @keyup.enter="submitLogin"></Password>
+                            <Password id="password" v-model="password" placeholder="请输入密码" :toggleMask="true" fluid :feedback="false" autocomplete="current-password" @keyup.enter="submitLogin"></Password>
                         </div>
 
                         <Message v-if="errorMessage" severity="error" :closable="false">{{ errorMessage }}</Message>
@@ -59,7 +93,7 @@ async function submitLogin() {
                                 <Checkbox v-model="checked" id="rememberme1" binary class="mr-2"></Checkbox>
                                 <label for="rememberme1">Remember me</label>
                             </div>
-                            <span class="text-sm text-color-secondary break-words">默认账号：admin / admin</span>
+                            <span class="text-sm text-color-secondary break-words">勾选后下次自动填充账号密码</span>
                         </div>
 
                         <Button label="Sign In" class="w-full mt-2" :loading="loading" @click="submitLogin"></Button>
