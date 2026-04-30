@@ -7,6 +7,9 @@ export const usersService = {
     create(payload) {
         return httpRequest('/users', { method: 'POST', body: payload });
     },
+    nextUserId() {
+        return httpRequest('/users/next-user-id');
+    },
     update(userId, payload) {
         return httpRequest(`/users/${userId}`, { method: 'PUT', body: payload });
     },

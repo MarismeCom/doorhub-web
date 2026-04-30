@@ -95,6 +95,28 @@ async function loadUsers() {
     }
 }
 
+async function loadSuggestedUserId(force = false) {
+    if (!force && createForm.user_id) {
+        return;
+    }
+
+    try {
+        const response = await usersService.nextUserId();
+        createForm.user_id = response.data?.user_id || '';
+    } catch (error) {
+        toast.add({ severity: 'warn', summary: '推荐用户ID加载失败', detail: error.message, life: 3000 });
+    }
+}
+
+function duplicateFieldMessage(error) {
+    const duplicateFields = error?.payload?.detail?.duplicate_fields;
+    if (!Array.isArray(duplicateFields) || duplicateFields.length === 0) {
+        return error.message;
+    }
+
+    return duplicateFields.map((item) => `${item.label}“${item.value}”已存在`).join('；');
+}
+
 async function submitCreate() {
     try {
         await usersService.create({ ...createForm, card: Number(createForm.card || 0) });
@@ -102,8 +124,9 @@ async function submitCreate() {
         toast.add({ severity: 'success', summary: '创建成功', detail: '门禁用户已创建', life: 2500 });
         listParams.page = 1;
         await loadUsers();
+        await loadSuggestedUserId(true);
     } catch (error) {
-        toast.add({ severity: 'error', summary: '创建失败', detail: error.message, life: 3000 });
+        toast.add({ severity: 'error', summary: '创建失败', detail: duplicateFieldMessage(error), life: 3000 });
     }
 }
 
@@ -138,7 +161,7 @@ async function submitEdit() {
         await loadUsers();
         await refreshSyncStatus();
     } catch (error) {
-        toast.add({ severity: 'error', summary: '更新失败', detail: error.message, life: 3000 });
+        toast.add({ severity: 'error', summary: '更新失败', detail: duplicateFieldMessage(error), life: 3000 });
     }
 }
 
@@ -320,6 +343,7 @@ onMounted(async () => {
     createForm.device_ip = '';
     syncForm.device_ip = '';
     await loadDeviceOptions();
+    await loadSuggestedUserId(true);
     await loadUsers();
     await refreshSyncStatus();
 });
@@ -343,8 +367,11 @@ onMounted(async () => {
                         <InputText v-model="createForm.name" fluid />
                     </div>
                     <div class="col-span-12 md:col-span-6 flex flex-col gap-2">
-                        <label>用户 ID</label>
-                        <InputText v-model="createForm.user_id" fluid />
+                        <label>用户 ID <span class="text-sm text-color-secondary">（自动填充最小未使用用户ID）</span></label>
+                        <div class="flex items-start gap-2">
+                            <InputText v-model="createForm.user_id" class="flex-1" fluid />
+                            <Button label="刷新" severity="secondary" outlined @click="loadSuggestedUserId(true)" />
+                        </div>
                     </div>
                     <div class="col-span-12 md:col-span-6 flex flex-col gap-2">
                         <label>权限</label>
