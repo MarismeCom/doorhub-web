@@ -8,6 +8,8 @@ const timeZone = 'Asia/Shanghai';
 const loading = ref(false);
 const exporting = ref(false);
 const recalculating = ref(false);
+const ruleSettingsDialog = ref(false);
+const ruleSettingsSaving = ref(false);
 const records = ref([]);
 const total = ref(0);
 const holidayCalendarDays = ref([]);
@@ -28,6 +30,10 @@ const filters = reactive({
     status: null,
     page: 1,
     page_size: 20
+});
+const ruleSettings = reactive({
+    plan_start: '10:00',
+    plan_end: '18:00'
 });
 
 const statusOptions = [
@@ -163,6 +169,35 @@ async function loadHolidayCalendar() {
     }
 }
 
+async function loadRuleSettings() {
+    try {
+        const response = await attendanceRecordsService.ruleSettings();
+        ruleSettings.plan_start = response.data.plan_start || '10:00';
+        ruleSettings.plan_end = response.data.plan_end || '18:00';
+    } catch (error) {
+        toast.add({ severity: 'warn', summary: '考勤规则加载失败', detail: error.message, life: 3000 });
+    }
+}
+
+async function saveRuleSettings() {
+    ruleSettingsSaving.value = true;
+    try {
+        const response = await attendanceRecordsService.updateRuleSettings({
+            plan_start: ruleSettings.plan_start,
+            plan_end: ruleSettings.plan_end
+        });
+        ruleSettings.plan_start = response.data.plan_start;
+        ruleSettings.plan_end = response.data.plan_end;
+        ruleSettingsDialog.value = false;
+        toast.add({ severity: 'success', summary: '保存成功', detail: '考勤规则已更新', life: 3000 });
+        await loadRecords();
+    } catch (error) {
+        toast.add({ severity: 'error', summary: '保存失败', detail: error.message, life: 3000 });
+    } finally {
+        ruleSettingsSaving.value = false;
+    }
+}
+
 async function recalculateRecords() {
     recalculating.value = true;
     try {
@@ -223,7 +258,7 @@ function resetFilters() {
 }
 
 onMounted(() => {
-    Promise.all([loadRecords(), loadHolidayCalendar()]);
+    Promise.all([loadRecords(), loadHolidayCalendar(), loadRuleSettings()]);
 });
 </script>
 
@@ -237,6 +272,7 @@ onMounted(() => {
                         <p class="text-color-secondary mt-2 mb-0">展示按月生成的日考勤结果，支持月统计、重算与导出。</p>
                     </div>
                     <div class="flex gap-2 flex-wrap">
+                        <Button label="考勤规则" icon="pi pi-cog" severity="secondary" outlined @click="ruleSettingsDialog = true" />
                         <Button label="重算当月" icon="pi pi-refresh" severity="contrast" :loading="recalculating" @click="recalculateRecords" />
                         <Button label="导出月报" icon="pi pi-download" :loading="exporting" @click="exportMonthly" />
                     </div>
@@ -318,6 +354,23 @@ onMounted(() => {
                 </DataTable>
             </div>
         </div>
+
+        <Dialog v-model:visible="ruleSettingsDialog" modal header="考勤规则" :style="{ width: 'min(28rem, 92vw)' }">
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-col gap-2">
+                    <label for="attendance-plan-start" class="font-medium">上班打卡时间</label>
+                    <InputMask id="attendance-plan-start" v-model="ruleSettings.plan_start" mask="99:99" placeholder="10:00" fluid />
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label for="attendance-plan-end" class="font-medium">下班打卡时间</label>
+                    <InputMask id="attendance-plan-end" v-model="ruleSettings.plan_end" mask="99:99" placeholder="18:00" fluid />
+                </div>
+            </div>
+            <template #footer>
+                <Button label="取消" text @click="ruleSettingsDialog = false" />
+                <Button label="保存" icon="pi pi-check" :loading="ruleSettingsSaving" @click="saveRuleSettings" />
+            </template>
+        </Dialog>
     </div>
 </template>
 
