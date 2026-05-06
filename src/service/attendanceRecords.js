@@ -26,6 +26,12 @@ export const attendanceRecordsService = {
     recalculate(payload) {
         return httpRequest('/attendance-records/recalculate', { method: 'POST', body: payload });
     },
+    ruleSettings() {
+        return httpRequest('/attendance-records/rule-settings');
+    },
+    updateRuleSettings(payload) {
+        return httpRequest('/attendance-records/rule-settings', { method: 'PUT', body: payload });
+    },
     holidayCacheStatus() {
         return httpRequest('/attendance-records/holiday-cache/status');
     },
