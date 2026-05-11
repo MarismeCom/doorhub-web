@@ -167,10 +167,7 @@ function holidayDayMeta(type, isHoliday) {
 async function loadHolidayCacheState() {
     cacheLoading.value = true;
     try {
-        const [statusResponse, settingsResponse] = await Promise.all([
-            attendanceRecordsService.holidayCacheStatus(),
-            attendanceRecordsService.holidayCacheSettings()
-        ]);
+        const [statusResponse, settingsResponse] = await Promise.all([attendanceRecordsService.holidayCacheStatus(), attendanceRecordsService.holidayCacheSettings()]);
         holidayCacheStatus.value = {
             status: statusResponse.data.status || holidayCacheStatus.value.status,
             schedule: settingsResponse.data || statusResponse.data.schedule || holidayCacheStatus.value.schedule
@@ -286,12 +283,7 @@ watch(
                         <div v-for="item in calendarWeekHeaders" :key="item" class="holiday-calendar-head-cell">{{ item }}</div>
                     </div>
                     <div v-for="(row, rowIndex) in holidayCalendarGrid" :key="rowIndex" class="holiday-calendar-row">
-                        <div
-                            v-for="cell in row"
-                            :key="cell?.key || `empty-${rowIndex}`"
-                            class="holiday-calendar-cell"
-                            :class="{ empty: !cell, today: cell?.isToday }"
-                        >
+                        <div v-for="cell in row" :key="cell?.key || `empty-${rowIndex}`" class="holiday-calendar-cell" :class="{ empty: !cell, today: cell?.isToday }">
                             <template v-if="cell">
                                 <div class="holiday-calendar-cell-top">
                                     <span class="holiday-calendar-day">{{ cell.day }}</span>
@@ -315,12 +307,8 @@ watch(
                     <div class="text-sm font-medium mb-2">当前状态</div>
                     <div class="text-sm text-color-secondary">{{ holidayCacheSummary }}</div>
                     <div class="text-sm text-color-secondary mt-2">执行信息：{{ formatNullableText(holidayCacheStatus.status.message) }}</div>
-                    <div class="text-sm text-color-secondary mt-2">
-                        最近执行年份：{{ formatNullableText(holidayCacheStatus.status.year) }}，刷新条数：{{ holidayCacheStatus.status.refreshed_count || 0 }}
-                    </div>
-                    <div class="text-sm text-color-secondary mt-2">
-                        开始时间：{{ formatDateTime(holidayCacheStatus.status.started_at) }}，结束时间：{{ formatDateTime(holidayCacheStatus.status.finished_at) }}
-                    </div>
+                    <div class="text-sm text-color-secondary mt-2">最近执行年份：{{ formatNullableText(holidayCacheStatus.status.year) }}，刷新条数：{{ holidayCacheStatus.status.refreshed_count || 0 }}</div>
+                    <div class="text-sm text-color-secondary mt-2">开始时间：{{ formatDateTime(holidayCacheStatus.status.started_at) }}，结束时间：{{ formatDateTime(holidayCacheStatus.status.finished_at) }}</div>
                 </div>
 
                 <div class="grid grid-cols-12 gap-3">
@@ -338,14 +326,7 @@ watch(
                     </div>
                     <div class="col-span-12 md:col-span-4">
                         <label class="block mb-2">每周执行日</label>
-                        <Select
-                            v-model="holidayCacheForm.weekday"
-                            :options="weekdayOptions"
-                            optionLabel="label"
-                            optionValue="value"
-                            fluid
-                            :disabled="holidayCacheForm.frequency !== 'weekly'"
-                        />
+                        <Select v-model="holidayCacheForm.weekday" :options="weekdayOptions" optionLabel="label" optionValue="value" fluid :disabled="holidayCacheForm.frequency !== 'weekly'" />
                     </div>
                     <div class="col-span-12 flex justify-end">
                         <Button label="保存刷新策略" icon="pi pi-save" :loading="cacheSaving" :disabled="cacheLoading" @click="saveHolidayCacheSettings" />
@@ -360,14 +341,7 @@ watch(
                         <InputNumber v-model="holidayCacheForm.refreshYear" :min="2020" :max="2099" fluid />
                     </div>
                     <div class="col-span-12 md:col-span-6 flex justify-end">
-                        <Button
-                            label="刷新指定年份缓存"
-                            icon="pi pi-cloud-download"
-                            severity="contrast"
-                            :loading="cacheRefreshing"
-                            :disabled="cacheLoading"
-                            @click="refreshHolidayCache"
-                        />
+                        <Button label="刷新指定年份缓存" icon="pi pi-cloud-download" severity="contrast" :loading="cacheRefreshing" :disabled="cacheLoading" @click="refreshHolidayCache" />
                     </div>
                 </div>
             </div>
@@ -377,9 +351,7 @@ watch(
 
 <style scoped>
 .holiday-cache-card {
-    background:
-        radial-gradient(circle at top right, rgba(230, 94, 94, 0.1), transparent 28%),
-        linear-gradient(180deg, rgba(252, 246, 240, 0.9), rgba(255, 255, 255, 1));
+    background: radial-gradient(circle at top right, rgba(230, 94, 94, 0.1), transparent 28%), linear-gradient(180deg, rgba(252, 246, 240, 0.9), rgba(255, 255, 255, 1));
 }
 
 .holiday-calendar-panel {

@@ -38,10 +38,7 @@ async function loadUsers() {
 }
 
 async function openDetail(username) {
-    const [detailResponse, secretsResponse] = await Promise.all([
-        systemUsersService.get(username),
-        systemUsersService.listApiSecrets(username)
-    ]);
+    const [detailResponse, secretsResponse] = await Promise.all([systemUsersService.get(username), systemUsersService.listApiSecrets(username)]);
     detail.value = detailResponse.data;
     apiSecrets.value = secretsResponse.data.items || [];
     detailDialog.value = true;
@@ -197,18 +194,18 @@ onMounted(loadUsers);
                             <Tag severity="contrast" :value="`共 ${users.length} 个用户`" />
                         </div>
                     </template>
-                    <Column field="username" header="用户名"></Column>
-                    <Column field="role" header="角色">
+                    <Column field="username" header="用户名" style="min-width: 10rem"></Column>
+                    <Column field="role" header="角色" style="min-width: 8rem">
                         <template #body="{ data }">
                             <Tag :value="data.role" :severity="data.role === 'admin' ? 'danger' : 'info'" />
                         </template>
                     </Column>
-                    <Column field="is_active" header="状态">
+                    <Column field="is_active" header="状态" style="min-width: 8rem">
                         <template #body="{ data }">
                             <Tag :value="data.is_active ? '启用' : '停用'" :severity="data.is_active ? 'success' : 'contrast'" />
                         </template>
                     </Column>
-                    <Column header="操作" style="width: 28rem">
+                    <Column header="操作" style="min-width: 22rem">
                         <template #body="{ data }">
                             <div class="flex items-center gap-2 whitespace-nowrap">
                                 <Button label="详情" text size="small" @click="openDetail(data.username)" />
@@ -288,13 +285,7 @@ onMounted(loadUsers);
             </template>
         </Dialog>
 
-        <Dialog
-            v-model:visible="detailDialog"
-            modal
-            header="系统用户详情"
-            :style="{ width: 'min(30rem, 92vw)' }"
-            @hide="detail = null"
-        >
+        <Dialog v-model:visible="detailDialog" modal header="系统用户详情" :style="{ width: 'min(30rem, 92vw)' }" @hide="detail = null">
             <div v-if="detail" class="flex flex-col gap-3">
                 <div><strong>用户名：</strong>{{ detail.username }}</div>
                 <div><strong>角色：</strong>{{ detail.role }}</div>
@@ -305,13 +296,7 @@ onMounted(loadUsers);
             </div>
         </Dialog>
 
-        <Dialog
-            v-model:visible="apiSecretDialog"
-            modal
-            header="管理 API Secret"
-            :style="{ width: 'min(72rem, 96vw)' }"
-            @hide="createdSecret = null"
-        >
+        <Dialog v-model:visible="apiSecretDialog" modal header="管理 API Secret" :style="{ width: 'min(72rem, 96vw)' }" @hide="createdSecret = null">
             <div class="flex flex-col gap-4">
                 <div class="text-sm text-color-secondary">每个系统用户最多创建 3 个有效 API Secret。明文 Secret 仅在创建成功时显示一次。</div>
                 <div class="grid grid-cols-12 gap-4">

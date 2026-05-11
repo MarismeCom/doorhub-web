@@ -10,9 +10,17 @@ const exporting = ref(false);
 const recalculating = ref(false);
 const ruleSettingsDialog = ref(false);
 const ruleSettingsSaving = ref(false);
+const exportSettingsDialog = ref(false);
+const exportSettingsLoading = ref(false);
+const exportSettingsSaving = ref(false);
 const records = ref([]);
 const total = ref(0);
 const holidayCalendarDays = ref([]);
+const exportFieldGroups = ref({
+    fixed_fields: [],
+    available_fields: []
+});
+const selectedExportFields = ref([]);
 const summary = ref({
     workday_count: 0,
     attendance_days: 0,
@@ -179,6 +187,22 @@ async function loadRuleSettings() {
     }
 }
 
+async function loadExportSettings() {
+    exportSettingsLoading.value = true;
+    try {
+        const response = await attendanceRecordsService.exportMonthlySettings();
+        exportFieldGroups.value = {
+            fixed_fields: response.data.fixed_fields || [],
+            available_fields: response.data.available_fields || []
+        };
+        selectedExportFields.value = [...(response.data.selected_fields || [])];
+    } catch (error) {
+        toast.add({ severity: 'warn', summary: '导出设置加载失败', detail: error.message, life: 3000 });
+    } finally {
+        exportSettingsLoading.value = false;
+    }
+}
+
 async function saveRuleSettings() {
     ruleSettingsSaving.value = true;
     try {
@@ -195,6 +219,42 @@ async function saveRuleSettings() {
         toast.add({ severity: 'error', summary: '保存失败', detail: error.message, life: 3000 });
     } finally {
         ruleSettingsSaving.value = false;
+    }
+}
+
+async function openExportSettings() {
+    exportSettingsDialog.value = true;
+    if (!exportFieldGroups.value.available_fields.length && !exportFieldGroups.value.fixed_fields.length) {
+        await loadExportSettings();
+    }
+}
+
+async function saveExportSettings() {
+    exportSettingsSaving.value = true;
+    try {
+        const response = await attendanceRecordsService.updateExportMonthlySettings({
+            selected_fields: selectedExportFields.value
+        });
+        exportFieldGroups.value = {
+            fixed_fields: response.data.fixed_fields || [],
+            available_fields: response.data.available_fields || []
+        };
+        selectedExportFields.value = [...(response.data.selected_fields || [])];
+        toast.add({ severity: 'success', summary: '保存成功', detail: '月报导出字段已保存', life: 3000 });
+        return true;
+    } catch (error) {
+        toast.add({ severity: 'error', summary: '保存失败', detail: error.message, life: 3000 });
+        return false;
+    } finally {
+        exportSettingsSaving.value = false;
+    }
+}
+
+async function saveExportSettingsAndExport() {
+    const saved = await saveExportSettings();
+    if (saved) {
+        exportSettingsDialog.value = false;
+        await exportMonthly();
     }
 }
 
@@ -259,6 +319,7 @@ function resetFilters() {
 
 onMounted(() => {
     Promise.all([loadRecords(), loadHolidayCalendar(), loadRuleSettings()]);
+    loadExportSettings();
 });
 </script>
 
@@ -274,6 +335,7 @@ onMounted(() => {
                     <div class="flex gap-2 flex-wrap">
                         <Button label="考勤规则" icon="pi pi-cog" severity="secondary" outlined @click="ruleSettingsDialog = true" />
                         <Button label="重算当月" icon="pi pi-refresh" severity="contrast" :loading="recalculating" @click="recalculateRecords" />
+                        <Button label="导出设置" icon="pi pi-sliders-h" severity="secondary" outlined @click="openExportSettings" />
                         <Button label="导出月报" icon="pi pi-download" :loading="exporting" @click="exportMonthly" />
                     </div>
                 </div>
@@ -343,13 +405,7 @@ onMounted(() => {
                         </template>
                     </Column>
                     <template #footer>
-                        <Paginator
-                            :rows="filters.page_size"
-                            :totalRecords="total"
-                            :first="(filters.page - 1) * filters.page_size"
-                            :rowsPerPageOptions="[20, 50, 100]"
-                            @page="handlePage"
-                        />
+                        <Paginator :rows="filters.page_size" :totalRecords="total" :first="(filters.page - 1) * filters.page_size" :rowsPerPageOptions="[20, 50, 100]" @page="handlePage" />
                     </template>
                 </DataTable>
             </div>
@@ -369,6 +425,37 @@ onMounted(() => {
             <template #footer>
                 <Button label="取消" text @click="ruleSettingsDialog = false" />
                 <Button label="保存" icon="pi pi-check" :loading="ruleSettingsSaving" @click="saveRuleSettings" />
+            </template>
+        </Dialog>
+
+        <Dialog v-model:visible="exportSettingsDialog" modal header="月报导出设置" :style="{ width: 'min(42rem, 94vw)' }">
+            <div v-if="exportSettingsLoading" class="py-4">
+                <Skeleton height="10rem" />
+            </div>
+            <div v-else class="flex flex-col gap-5">
+                <Message severity="info" :closable="false"> 日期列固定导出，签到时间和签退时间只输出时分秒。其余字段可按需勾选并保存。 </Message>
+                <div class="flex flex-col gap-3">
+                    <div class="font-medium">固定字段</div>
+                    <div class="flex flex-wrap gap-2">
+                        <Tag v-for="item in exportFieldGroups.fixed_fields" :key="item.key" :value="item.label" severity="secondary" />
+                    </div>
+                </div>
+                <div class="flex flex-col gap-3">
+                    <div class="font-medium">可选字段</div>
+                    <div class="grid grid-cols-12 gap-3">
+                        <div v-for="item in exportFieldGroups.available_fields" :key="item.key" class="col-span-12 md:col-span-6">
+                            <div class="flex items-center gap-2 rounded-lg border border-surface-200 px-3 py-2">
+                                <Checkbox v-model="selectedExportFields" :value="item.key" :inputId="`export-field-${item.key}`" />
+                                <label :for="`export-field-${item.key}`" class="cursor-pointer select-none">{{ item.label }}</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <template #footer>
+                <Button label="取消" text @click="exportSettingsDialog = false" />
+                <Button label="保存设置" icon="pi pi-save" severity="secondary" :loading="exportSettingsSaving" @click="saveExportSettings" />
+                <Button label="保存并导出" icon="pi pi-download" :loading="exportSettingsSaving || exporting" @click="saveExportSettingsAndExport" />
             </template>
         </Dialog>
     </div>

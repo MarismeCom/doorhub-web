@@ -199,17 +199,17 @@ onMounted(loadDevices);
                             <Tag severity="contrast" :value="`共 ${devices.length} 台`" />
                         </div>
                     </template>
-                    <Column field="name" header="名称"></Column>
-                    <Column field="ip" header="IP"></Column>
-                    <Column field="port" header="端口"></Column>
-                    <Column field="serial_number" header="序列号"></Column>
-                    <Column field="location" header="位置"></Column>
-                    <Column header="状态">
+                    <Column field="name" header="名称" style="min-width: 10rem"></Column>
+                    <Column field="ip" header="IP" style="min-width: 10rem"></Column>
+                    <Column field="port" header="端口" style="min-width: 7rem"></Column>
+                    <Column field="serial_number" header="序列号" style="min-width: 12rem"></Column>
+                    <Column field="location" header="位置" style="min-width: 10rem"></Column>
+                    <Column header="状态" style="min-width: 8rem">
                         <template #body="{ data }">
                             <Tag :value="statusLabel(data)" :severity="statusSeverity(data)" />
                         </template>
                     </Column>
-                    <Column header="操作" style="width: 12rem">
+                    <Column header="操作" style="min-width: 12rem">
                         <template #body="{ data }">
                             <div class="flex gap-2 flex-wrap">
                                 <Button label="编辑" text size="small" icon="pi pi-pencil" @click="openEditDialog(data)" />

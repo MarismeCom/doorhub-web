@@ -52,11 +52,7 @@ const statCards = computed(() => [
 ]);
 
 const recent7dTotal = computed(() => summary.value.attendances.recent_7d.reduce((sum, item) => sum + item.count, 0));
-const pendingSyncTotal = computed(() =>
-    summary.value.sync_status
-        .filter((item) => ['pending', 'pending_disable', 'failed'].includes(item.status))
-        .reduce((sum, item) => sum + item.count, 0)
-);
+const pendingSyncTotal = computed(() => summary.value.sync_status.filter((item) => ['pending', 'pending_disable', 'failed'].includes(item.status)).reduce((sum, item) => sum + item.count, 0));
 
 async function loadSummary() {
     loading.value = true;

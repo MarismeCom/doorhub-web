@@ -133,22 +133,15 @@ onMounted(async () => {
                             <Tag severity="contrast" :value="`共 ${total} 条`" />
                         </div>
                     </template>
-                    <Column field="id" header="ID"></Column>
-                    <Column field="operator" header="操作人"></Column>
-                    <Column field="device_ip" header="设备 IP"></Column>
-                    <Column field="action" header="动作"></Column>
-                    <Column field="result" header="结果"></Column>
-                    <Column field="remark" header="备注"></Column>
-                    <Column field="operated_at" header="操作时间"></Column>
+                    <Column field="id" header="ID" style="min-width: 6rem"></Column>
+                    <Column field="operator" header="操作人" style="min-width: 9rem"></Column>
+                    <Column field="device_ip" header="设备 IP" style="min-width: 10rem"></Column>
+                    <Column field="action" header="动作" style="min-width: 8rem"></Column>
+                    <Column field="result" header="结果" style="min-width: 8rem"></Column>
+                    <Column field="remark" header="备注" style="min-width: 12rem"></Column>
+                    <Column field="operated_at" header="操作时间" style="min-width: 14rem"></Column>
                 </DataTable>
-                <Paginator
-                    :rows="logFilters.page_size"
-                    :totalRecords="total"
-                    :first="(logFilters.page - 1) * logFilters.page_size"
-                    :rowsPerPageOptions="[10, 20, 50]"
-                    class="mt-4"
-                    @page="handlePage"
-                />
+                <Paginator :rows="logFilters.page_size" :totalRecords="total" :first="(logFilters.page - 1) * logFilters.page_size" :rowsPerPageOptions="[10, 20, 50]" class="mt-4" @page="handlePage" />
             </div>
         </div>
 

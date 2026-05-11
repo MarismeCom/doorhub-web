@@ -19,13 +19,7 @@ function buildUrl(path, query) {
 }
 
 export async function httpRequest(path, options = {}) {
-    const {
-        method = 'GET',
-        body,
-        query,
-        auth = true,
-        headers = {}
-    } = options;
+    const { method = 'GET', body, query, auth = true, headers = {} } = options;
 
     const requestHeaders = {
         Accept: 'application/json',
