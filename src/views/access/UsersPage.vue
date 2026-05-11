@@ -367,7 +367,7 @@ onMounted(async () => {
                         <InputText v-model="createForm.name" fluid />
                     </div>
                     <div class="col-span-12 md:col-span-6 flex flex-col gap-2">
-                        <label>用户 ID <span class="text-sm text-color-secondary">（自动填充最小未使用用户ID）</span></label>
+                        <label>用户 ID</label>
                         <div class="flex items-start gap-2">
                             <InputText v-model="createForm.user_id" class="flex-1" fluid />
                             <Button label="刷新" severity="secondary" outlined @click="loadSuggestedUserId(true)" />
@@ -413,12 +413,12 @@ onMounted(async () => {
                         <InputText v-model="syncForm.user_id" fluid />
                     </div>
                 </div>
-                <div class="flex gap-2 flex-wrap mt-4">
-                    <Button label="刷新同步状态" severity="secondary" @click="refreshSyncStatus" />
-                    <Button label="批量同步待处理用户" @click="syncBatch" />
-                    <Button label="设备用户预览" severity="contrast" @click="previewFromDevice('preview')" />
-                    <Button label="写入缺失用户" severity="help" @click="previewFromDevice('write_missing')" />
-                    <Button label="覆盖本地数据库" severity="warn" @click="previewFromDevice('overwrite_local')" />
+                <div class="sync-console-actions mt-4">
+                    <Button class="sync-console-action" label="刷新同步状态" severity="secondary" @click="refreshSyncStatus" />
+                    <Button class="sync-console-action" label="批量同步待处理用户" @click="syncBatch" />
+                    <Button class="sync-console-action" label="设备用户预览" severity="contrast" @click="previewFromDevice('preview')" />
+                    <Button class="sync-console-action" label="写入缺失用户" severity="help" @click="previewFromDevice('write_missing')" />
+                    <Button class="sync-console-action" label="覆盖本地数据库" severity="warn" @click="previewFromDevice('overwrite_local')" />
                 </div>
                 <div class="mt-4 flex items-center gap-2 flex-wrap">
                     <span class="text-sm text-color-secondary">当前同步目标设备</span>
@@ -435,17 +435,7 @@ onMounted(async () => {
 
         <div class="col-span-12">
             <div class="card">
-                <DataTable
-                    :value="users"
-                    :loading="loading"
-                    :sort-field="sortField"
-                    :sort-order="sortOrder"
-                    dataKey="user_id"
-                    lazy
-                    stripedRows
-                    scrollable
-                    @sort="handleSort"
-                >
+                <DataTable :value="users" :loading="loading" :sort-field="sortField" :sort-order="sortOrder" dataKey="user_id" lazy stripedRows scrollable @sort="handleSort">
                     <template #header>
                         <div class="flex items-center justify-between gap-3 flex-wrap">
                             <div class="flex flex-col gap-1">
@@ -463,29 +453,29 @@ onMounted(async () => {
                             </div>
                         </div>
                     </template>
-                    <Column field="uid" header="UID" sortable></Column>
-                    <Column field="user_id" header="用户 ID" sortable></Column>
-                    <Column field="name" header="姓名" sortable></Column>
-                    <Column field="status" header="状态" sortable>
+                    <Column field="uid" header="UID" sortable style="min-width: 6rem"></Column>
+                    <Column field="user_id" header="用户 ID" sortable style="min-width: 9rem"></Column>
+                    <Column field="name" header="姓名" sortable style="min-width: 8rem"></Column>
+                    <Column field="status" header="状态" sortable style="min-width: 7rem">
                         <template #body="{ data }">
                             <Tag :value="employmentStatusLabel(data.status)" :severity="employmentStatusSeverity(data.status)" />
                         </template>
                     </Column>
-                    <Column field="privilege" header="权限" sortable>
+                    <Column field="privilege" header="权限" sortable style="min-width: 7rem">
                         <template #body="{ data }">
                             <Tag :value="privilegeLabel(data.privilege)" severity="info" />
                         </template>
                     </Column>
-                    <Column field="password" header="密码" sortable></Column>
-                    <Column field="card" header="卡号" sortable></Column>
-                    <Column field="sync_status" header="同步状态" sortable>
+                    <Column field="password" header="密码" sortable style="min-width: 8rem"></Column>
+                    <Column field="card" header="卡号" sortable style="min-width: 8rem"></Column>
+                    <Column field="sync_status" header="同步状态" sortable style="min-width: 9rem">
                         <template #body="{ data }">
                             <Tag :value="syncStatusLabel(data.sync_status)" :severity="syncStatusSeverity(data.sync_status)" />
                         </template>
                     </Column>
-                    <Column header="操作" style="width: 23rem">
+                    <Column header="操作" style="min-width: 19rem">
                         <template #body="{ data }">
-                            <div class="flex items-center gap-2 whitespace-nowrap">
+                            <div class="user-row-actions">
                                 <Button label="编辑" text size="small" severity="secondary" @click="prepareEdit(data)" />
                                 <Button :label="`同步设备 (${syncForm.device_ip || '未选择'})`" text size="small" @click="syncOne(data.user_id)" />
                                 <Button label="离职" text size="small" severity="warn" @click="deleteUser(data.user_id)" />
@@ -493,24 +483,11 @@ onMounted(async () => {
                         </template>
                     </Column>
                 </DataTable>
-                <Paginator
-                    :rows="listParams.page_size"
-                    :totalRecords="total"
-                    :first="(listParams.page - 1) * listParams.page_size"
-                    :rowsPerPageOptions="[10, 20, 50]"
-                    class="mt-4"
-                    @page="handlePage"
-                />
+                <Paginator :rows="listParams.page_size" :totalRecords="total" :first="(listParams.page - 1) * listParams.page_size" :rowsPerPageOptions="[10, 20, 50]" class="mt-4" @page="handlePage" />
             </div>
         </div>
 
-        <Dialog
-            v-model:visible="editDialogVisible"
-            modal
-            header="编辑本地门禁用户"
-            :style="{ width: 'min(36rem, 92vw)' }"
-            @hide="selectedUser = null"
-        >
+        <Dialog v-model:visible="editDialogVisible" modal header="编辑本地门禁用户" :style="{ width: 'min(36rem, 92vw)' }" @hide="selectedUser = null">
             <div class="grid grid-cols-12 gap-4">
                 <div class="col-span-12 md:col-span-6 flex flex-col gap-2">
                     <label>姓名</label>
@@ -558,31 +535,31 @@ onMounted(async () => {
                 <Accordion :multiple="true" :activeIndex="[0, 1, 2]">
                     <AccordionTab header="本地缺失用户">
                         <DataTable :value="syncPreview.missing_in_local" stripedRows size="small">
-                            <Column field="uid" header="UID"></Column>
-                            <Column field="user_id" header="用户 ID"></Column>
-                            <Column field="name" header="姓名"></Column>
-                            <Column header="权限">
+                            <Column field="uid" header="UID" style="min-width: 6rem"></Column>
+                            <Column field="user_id" header="用户 ID" style="min-width: 9rem"></Column>
+                            <Column field="name" header="姓名" style="min-width: 8rem"></Column>
+                            <Column header="权限" style="min-width: 7rem">
                                 <template #body="{ data }">
                                     {{ privilegeLabel(data.privilege) }}
                                 </template>
                             </Column>
-                            <Column field="password" header="密码"></Column>
-                            <Column field="card" header="卡号"></Column>
+                            <Column field="password" header="密码" style="min-width: 8rem"></Column>
+                            <Column field="card" header="卡号" style="min-width: 8rem"></Column>
                         </DataTable>
                     </AccordionTab>
                     <AccordionTab header="本地差异用户">
                         <DataTable :value="syncPreview.different_in_local" stripedRows size="small">
-                            <Column field="uid" header="UID"></Column>
-                            <Column field="user_id" header="用户 ID"></Column>
-                            <Column field="name" header="设备姓名"></Column>
-                            <Column header="差异字段">
+                            <Column field="uid" header="UID" style="min-width: 6rem"></Column>
+                            <Column field="user_id" header="用户 ID" style="min-width: 9rem"></Column>
+                            <Column field="name" header="设备姓名" style="min-width: 9rem"></Column>
+                            <Column header="差异字段" style="min-width: 10rem">
                                 <template #body="{ data }">
                                     <div class="flex gap-2 flex-wrap">
                                         <Tag v-for="field in diffFieldNames(data)" :key="field" severity="warn" :value="field" />
                                     </div>
                                 </template>
                             </Column>
-                            <Column header="本地快照">
+                            <Column header="本地快照" style="min-width: 20rem">
                                 <template #body="{ data }">
                                     <pre class="m-0 text-xs bg-surface-100 p-2 border-round overflow-auto">{{ JSON.stringify(data.local_snapshot, null, 2) }}</pre>
                                 </template>
@@ -591,10 +568,10 @@ onMounted(async () => {
                     </AccordionTab>
                     <AccordionTab header="UID 冲突">
                         <DataTable :value="syncPreview.uid_conflicts" stripedRows size="small">
-                            <Column field="uid" header="UID"></Column>
-                            <Column field="user_id" header="设备用户 ID"></Column>
-                            <Column field="name" header="设备姓名"></Column>
-                            <Column header="冲突本地快照">
+                            <Column field="uid" header="UID" style="min-width: 6rem"></Column>
+                            <Column field="user_id" header="设备用户 ID" style="min-width: 10rem"></Column>
+                            <Column field="name" header="设备姓名" style="min-width: 9rem"></Column>
+                            <Column header="冲突本地快照" style="min-width: 20rem">
                                 <template #body="{ data }">
                                     <pre class="m-0 text-xs bg-surface-100 p-2 border-round overflow-auto">{{ JSON.stringify(data.local_snapshot, null, 2) }}</pre>
                                 </template>
@@ -606,3 +583,29 @@ onMounted(async () => {
         </div>
     </div>
 </template>
+
+<style scoped>
+.sync-console-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr));
+    gap: 0.5rem;
+}
+
+.sync-console-action {
+    width: 100%;
+    justify-content: center;
+}
+
+.user-row-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+    .user-row-actions :deep(.p-button) {
+        flex: 1 1 8.5rem;
+    }
+}
+</style>

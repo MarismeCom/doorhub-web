@@ -171,25 +171,9 @@ async function loadSyncStatus() {
 }
 
 function isNoNewDataError(error) {
-    const message = [
-        error?.message,
-        error?.payload?.message,
-        error?.payload?.detail?.message,
-        error?.payload?.detail?.detail
-    ]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
+    const message = [error?.message, error?.payload?.message, error?.payload?.detail?.message, error?.payload?.detail?.detail].filter(Boolean).join(' ').toLowerCase();
 
-    return [
-        '没有更多新数据',
-        '没有新数据',
-        '无新数据',
-        'no more new data',
-        'no new data',
-        'no attendance data',
-        'no data'
-    ].some((pattern) => message.includes(pattern));
+    return ['没有更多新数据', '没有新数据', '无新数据', 'no more new data', 'no new data', 'no attendance data', 'no data'].some((pattern) => message.includes(pattern));
 }
 
 async function handleSyncStatusTransition(previousStatus, currentStatus) {
@@ -203,11 +187,7 @@ async function handleSyncStatusTransition(previousStatus, currentStatus) {
     }
 
     const justFinished = previousStatus?.running && !currentStatus.running;
-    const shouldHandleManualCompletion =
-        manualSyncPending.value &&
-        currentStatus.source === 'manual' &&
-        currentStatus.finished_at &&
-        handledSyncFinishedAt.value !== currentStatus.finished_at;
+    const shouldHandleManualCompletion = manualSyncPending.value && currentStatus.source === 'manual' && currentStatus.finished_at && handledSyncFinishedAt.value !== currentStatus.finished_at;
 
     if (!justFinished && !shouldHandleManualCompletion) {
         if (!currentStatus.running) {
@@ -235,9 +215,7 @@ async function handleSyncStatusTransition(previousStatus, currentStatus) {
     toast.add({
         severity: syncResult.value.no_new_data ? 'info' : 'success',
         summary: '同步完成',
-        detail: syncResult.value.no_new_data
-            ? '没有更多新数据'
-            : `解析 ${syncResult.value.fetched_count} 条，新增 ${syncResult.value.synced_count} 条，重复 ${syncResult.value.duplicate_count} 条`,
+        detail: syncResult.value.no_new_data ? '没有更多新数据' : `解析 ${syncResult.value.fetched_count} 条，新增 ${syncResult.value.synced_count} 条，重复 ${syncResult.value.duplicate_count} 条`,
         life: 3500
     });
     await loadRecords();
@@ -472,15 +450,15 @@ onBeforeUnmount(() => {
 
         <div class="col-span-12 xl:col-span-6">
             <div class="card h-full">
-                        <h3 class="text-lg mt-0">手动同步</h3>
-                        <div class="flex flex-col gap-3">
-                            <Select v-model="syncForm.device_ip" :options="deviceOptions" optionLabel="label" optionValue="value" placeholder="选择设备" fluid />
-                            <div class="flex items-center gap-2">
-                                <Checkbox v-model="syncForm.incremental" binary inputId="incremental-sync" />
-                                <label for="incremental-sync">增量同步</label>
-                            </div>
-                            <Button label="同步打卡记录" icon="pi pi-refresh" :disabled="isSyncRunning" :loading="manualSyncPending" @click="syncAttendances" />
-                        </div>
+                <h3 class="text-lg mt-0">手动同步</h3>
+                <div class="flex flex-col gap-3">
+                    <Select v-model="syncForm.device_ip" :options="deviceOptions" optionLabel="label" optionValue="value" placeholder="选择设备" fluid />
+                    <div class="flex items-center gap-2">
+                        <Checkbox v-model="syncForm.incremental" binary inputId="incremental-sync" />
+                        <label for="incremental-sync">增量同步</label>
+                    </div>
+                    <Button label="同步打卡记录" icon="pi pi-refresh" :disabled="isSyncRunning" :loading="manualSyncPending" @click="syncAttendances" />
+                </div>
                 <div class="mt-4">
                     <div class="flex items-center justify-between gap-3 mb-2 flex-wrap">
                         <span class="font-medium">同步状态</span>
@@ -491,9 +469,7 @@ onBeforeUnmount(() => {
                     <div v-if="syncStatus?.status" class="text-xs text-color-secondary mt-2">
                         解析 {{ syncStatus.status.fetched_count || 0 }} 条，新增 {{ syncStatus.status.synced_count || 0 }} 条，重复 {{ syncStatus.status.duplicate_count || 0 }} 条，跳过 {{ syncStatus.status.skipped_invalid_count || 0 }} 条
                     </div>
-                    <div v-if="syncStatus?.status" class="text-xs text-color-secondary mt-2">
-                        上次开始：{{ formatDateTime(syncStatus.status.started_at) }}，上次完成：{{ formatDateTime(syncStatus.status.finished_at) }}
-                    </div>
+                    <div v-if="syncStatus?.status" class="text-xs text-color-secondary mt-2">上次开始：{{ formatDateTime(syncStatus.status.started_at) }}，上次完成：{{ formatDateTime(syncStatus.status.finished_at) }}</div>
                 </div>
             </div>
         </div>
@@ -512,15 +488,7 @@ onBeforeUnmount(() => {
                     </div>
                     <div class="flex flex-col gap-2">
                         <label>同步设备范围</label>
-                        <MultiSelect
-                            v-model="scheduleForm.device_ips"
-                            :options="deviceOptions"
-                            optionLabel="label"
-                            optionValue="value"
-                            placeholder="未选择时默认同步全部启用设备"
-                            display="chip"
-                            fluid
-                        />
+                        <MultiSelect v-model="scheduleForm.device_ips" :options="deviceOptions" optionLabel="label" optionValue="value" placeholder="未选择时默认同步全部启用设备" display="chip" fluid />
                     </div>
                     <Button label="保存定时配置" icon="pi pi-clock" :loading="savingSchedule" @click="saveSyncSettings" />
                 </div>
@@ -568,39 +536,32 @@ onBeforeUnmount(() => {
                             </div>
                         </div>
                     </template>
-                    <Column field="id" header="ID" sortable></Column>
-                    <Column field="user_id" header="用户 ID" sortable></Column>
-                    <Column field="user_name" header="用户名称" sortable>
+                    <Column field="id" header="ID" sortable style="min-width: 6rem"></Column>
+                    <Column field="user_id" header="用户 ID" sortable style="min-width: 9rem"></Column>
+                    <Column field="user_name" header="用户名称" sortable style="min-width: 9rem">
                         <template #body="{ data }">
                             {{ data.user_name || '-' }}
                         </template>
                     </Column>
-                    <Column field="uid" header="UID" sortable></Column>
-                    <Column field="timestamp" header="打卡时间" sortable>
+                    <Column field="uid" header="UID" sortable style="min-width: 8rem"></Column>
+                    <Column field="timestamp" header="打卡时间" sortable style="min-width: 14rem">
                         <template #body="{ data }">
                             {{ formatTimestamp(data.timestamp) }}
                         </template>
                     </Column>
-                    <Column field="status" header="状态" sortable>
+                    <Column field="status" header="状态" sortable style="min-width: 8rem">
                         <template #body="{ data }">
                             <Tag :value="statusLabel(data.status)" :severity="statusSeverity(data.status)" />
                         </template>
                     </Column>
-                    <Column field="punch" header="打开类型" sortable>
+                    <Column field="punch" header="打开类型" sortable style="min-width: 9rem">
                         <template #body="{ data }">
                             <Tag :value="punchLabel(data.punch)" :severity="punchSeverity(data.punch)" />
                         </template>
                     </Column>
-                    <Column field="device_sn" header="设备 SN" sortable></Column>
+                    <Column field="device_sn" header="设备 SN" sortable style="min-width: 12rem"></Column>
                 </DataTable>
-                <Paginator
-                    :rows="filters.page_size"
-                    :totalRecords="total"
-                    :first="(filters.page - 1) * filters.page_size"
-                    :rowsPerPageOptions="[10, 20, 50]"
-                    class="mt-4"
-                    @page="handlePage"
-                />
+                <Paginator :rows="filters.page_size" :totalRecords="total" :first="(filters.page - 1) * filters.page_size" :rowsPerPageOptions="[10, 20, 50]" class="mt-4" @page="handlePage" />
             </div>
         </div>
 

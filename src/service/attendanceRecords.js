@@ -47,6 +47,12 @@ export const attendanceRecordsService = {
     refreshHolidayCache(payload) {
         return httpRequest('/attendance-records/holiday-cache/refresh', { method: 'POST', body: payload });
     },
+    exportMonthlySettings() {
+        return httpRequest('/attendance-records/export/monthly/settings');
+    },
+    updateExportMonthlySettings(payload) {
+        return httpRequest('/attendance-records/export/monthly/settings', { method: 'PUT', body: payload });
+    },
     async exportMonthly(params) {
         const response = await fetch(buildUrl('/attendance-records/export/monthly', params), {
             headers: sessionState.accessToken.value
